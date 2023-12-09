@@ -6,86 +6,101 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql" // default pstgresql
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id    Int     @default(autoincrement()) @id
-  name  String
-  email String  @unique
-  kakaoId String 
-  profileImage String
-  role  Role @default(USER)
-  createAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-  books UserToBook[] 
-}
+  id              Int     @id @default(autoincrement())
+  name            String  @db.VarChar(100)
+  email           String? @unique
+  kakaoId         String? @map("kakao_id")
+  profileImageUrl String  @map("profile_image_url") @db.VarChar(1024)
+  role            role    @default(user)
 
+  createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
+  deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
+
+  books UserBook[]
+}
 
 model Book {
-  id    Int   @default(autoincrement()) @id
-  title   String
-  author    String
-  publisher   String?
-  info    String?
-  bookImage   String?
-  bookNo    Int
-  createAt  DateTime @default(now())
-  updateAt  DateTime @updatedAt
-  users UserToBook[]
+  id           Int     @id @default(autoincrement())
+  title        String  @db.VarChar(255)
+  author       String  @db.VarChar(255)
+  publisher    String? @db.VarChar(255)
+  description  String? @db.Text
+  bookImageUrl String? @map("book_image_url") @db.VarChar(1024)
+  isbn         String  @unique() @db.VarChar(20)
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
+  deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
+
+  users UserBook[]
 }
 
-model UserToBook {
-  id    Int   @default(autoincrement()) @id
-  user  User  @relation(fields: [userId], references: [id])
-  userId Int @unique
-  book Book   @relation(fields: [bookId], references: [id])
-  bookId Int @unique
-  status Read
-  createAt  DateTime @default(now())
-  updateAt  DateTime @updatedAt
-  notes Note[]
+model UserBook {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique @map("user_id")
+  book   Book @relation(fields: [bookId], references: [id])
+  bookId Int  @unique @map("book_id")
+
+  status read_status
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
+  deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
+
+  notes BookNote[]
 }
 
-model Note{
-  id  Int  @default(autoincrement()) @id
-  userbook UserToBook   @relation(fields: [userbookId], references:[id])
-  userbookId Int @unique
-  note String
-  noteType NoteType
-  createAt  DateTime @default(now())
-  updateAt  DateTime @updatedAt
+model BookNote {
+  id         Int      @id @default(autoincrement())
+  userbookId Int      @map("user_book_id")
+  userbook   UserBook @relation(fields: [userbookId], references: [id])
+
+  note     String    @db.Text
+  noteType note_type
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
+  deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
+
   questions Question[]
 }
 
-model Question{
-  id  Int   @default(autoincrement()) @id
-  note  Note   @relation(fields: [noteId], references:[id])
-  noteId  Int @unique
-  question  String
-  answer  String
-  content String?
-  createAt  DateTime @default(now())
-  updateAt  DateTime @updatedAt
+model Question {
+  id     Int      @id @default(autoincrement())
+  noteId Int      @map("note_id")
+  note   BookNote @relation(fields: [noteId], references: [id])
+
+  originalBookNote String? @map("original_book_note") @db.Text
+  question         String  @db.VarChar(500)
+  answer           String  @db.Text
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
+  deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
 }
 
-
-enum Role {
-  USER
-  ADMIN
+enum role {
+  user
+  admin
 }
 
-enum Read{
-  BEFORE
-  ING
-  AFTER
-  FAIL
+enum read_status {
+  not_started
+  reading
+  done
+  failed
+  dropped
 }
 
-enum NoteType{
-  FREE
-  FINAL
+enum note_type {
+  free
+  final_review
+  remind_review
 }
-
