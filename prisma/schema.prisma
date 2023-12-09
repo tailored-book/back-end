@@ -23,6 +23,10 @@ model User {
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
 
   books UserBook[]
+
+  @@index([kakaoId])
+  @@index([email])
+  @@map("user")
 }
 
 model Book {
@@ -39,6 +43,10 @@ model Book {
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
 
   users UserBook[]
+
+  @@index([author])
+  @@index([isbn])
+  @@map("book")
 }
 
 model UserBook {
@@ -55,6 +63,8 @@ model UserBook {
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
 
   notes BookNote[]
+
+  @@unique([userId, bookId], map: "userId_bookId")
 }
 
 model BookNote {
@@ -70,6 +80,9 @@ model BookNote {
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
 
   questions Question[]
+
+  @@index([userbookId])
+  @@map("book_note")
 }
 
 model Question {
@@ -84,6 +97,9 @@ model Question {
   createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(6)
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
+
+  @@index([noteId])
+  @@map("question")
 }
 
 enum role {
