@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql" // default pstgresql
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id    Int     @default(autoincrement()) @id
+  name  String
+  email String  @unique
+  kakaoId String 
+  profileImage String
+  role  Role @default(USER)
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  books UserToBook[] 
+}
+
+
+model Book {
+  id    Int   @default(autoincrement()) @id
+  title   String
+  author    String
+  publisher   String?
+  info    String?
+  bookImage   String?
+  bookNo    Int
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  users UserToBook[]
+}
+
+model UserToBook {
+  id    Int   @default(autoincrement()) @id
+  user  User  @relation(fields: [userId], references: [id])
+  userId Int @unique
+  book Book   @relation(fields: [bookId], references: [id])
+  bookId Int @unique
+  status Read
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  notes Note[]
+}
+
+model Note{
+  id  Int  @default(autoincrement()) @id
+  userbook UserToBook   @relation(fields: [userbookId], references:[id])
+  userbookId Int @unique
+  note String
+  noteType NoteType
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  questions Question[]
+}
+
+model Question{
+  id  Int   @default(autoincrement()) @id
+  note  Note   @relation(fields: [noteId], references:[id])
+  noteId  Int @unique
+  question  String
+  answer  String
+  content String?
+  createAt  DateTime @default(now())
+  updateAt  DateTime @updatedAt
+}
+
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Read{
+  BEFORE
+  ING
+  AFTER
+  FAIL
+}
+
+enum NoteType{
+  FREE
+  FINAL
+}
+
