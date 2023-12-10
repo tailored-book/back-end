@@ -42,35 +42,30 @@ model Book {
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
 
-  users UserBook[]
-
+  @@index([title])
   @@index([author])
   @@index([isbn])
   @@map("book")
 }
 
 model UserBook {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int  @unique @map("user_id")
-  book   Book @relation(fields: [bookId], references: [id])
-  bookId Int  @unique @map("book_id")
+  id     Int @id @default(autoincrement())
+  userId Int @map("user_id")
+  bookId Int @map("book_id")
 
   status read_status
 
   createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(6)
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
-
-  notes BookNote[]
+  User      User      @relation(fields: [userId], references: [id])
 
   @@unique([userId, bookId], map: "userId_bookId")
 }
 
 model BookNote {
-  id         Int      @id @default(autoincrement())
-  userbookId Int      @map("user_book_id")
-  userbook   UserBook @relation(fields: [userbookId], references: [id])
+  id         Int @id @default(autoincrement())
+  userbookId Int @map("user_book_id")
 
   note     String    @db.Text
   noteType note_type
@@ -79,16 +74,13 @@ model BookNote {
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
 
-  questions Question[]
-
   @@index([userbookId])
   @@map("book_note")
 }
 
 model Question {
-  id     Int      @id @default(autoincrement())
-  noteId Int      @map("note_id")
-  note   BookNote @relation(fields: [noteId], references: [id])
+  id     Int @id @default(autoincrement())
+  noteId Int @map("note_id")
 
   originalBookNote String? @map("original_book_note") @db.Text
   question         String  @db.VarChar(500)
