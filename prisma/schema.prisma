@@ -22,8 +22,6 @@ model User {
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
 
-  books UserBook[]
-
   @@index([kakaoId])
   @@index([email])
   @@map("user")
@@ -58,7 +56,6 @@ model UserBook {
   createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(6)
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
   deletedAt DateTime? @map("deleted_at") @db.DateTime(6)
-  User      User      @relation(fields: [userId], references: [id])
 
   @@unique([userId, bookId], map: "userId_bookId")
 }
